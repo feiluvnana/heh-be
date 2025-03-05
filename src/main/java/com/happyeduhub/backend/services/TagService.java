@@ -1,11 +1,12 @@
-package com.happyeduhub.backend.service;
+package com.happyeduhub.backend.services;
 
-import com.happyeduhub.backend.entity.TagEntity;
-import com.happyeduhub.backend.repository.TagRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.happyeduhub.backend.entities.TagEntity;
+import com.happyeduhub.backend.repositories.TagRepository;
 
 @Service
 public class TagService {

@@ -1,9 +1,14 @@
-package com.happyeduhub.backend.entity;
+package com.happyeduhub.backend.entities;
 
 import com.happyeduhub.backend.core.enums.TagType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity(name = "tags")
