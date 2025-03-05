@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder(toBuilder = true)
-public class LoginInDto {
+public class RegisterInDto {
   @NotBlank(message = "Cần phải nhập `username`.")
   private String username;
 
