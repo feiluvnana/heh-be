@@ -2,6 +2,8 @@ package com.happyeduhub.backend.core.utils;
 
 import java.util.Date;
 
+import org.springframework.stereotype.Component;
+
 import com.happyeduhub.backend.core.dtos.exception.ExceptionDto;
 import com.happyeduhub.backend.entities.UserEntity;
 
@@ -11,6 +13,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 
+@Component
 public class JwtUtility {
   private String secretKey = "secret";
   private long expiresIn = 14 * 24 * 60 * 60 * 1000;

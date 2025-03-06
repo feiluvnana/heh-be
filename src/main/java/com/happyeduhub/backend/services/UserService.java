@@ -1,10 +1,13 @@
 package com.happyeduhub.backend.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.happyeduhub.backend.core.dtos.common.EntityDtoMapper;
 import com.happyeduhub.backend.core.dtos.common.UserDto;
 import com.happyeduhub.backend.core.dtos.exception.ExceptionDto;
 import com.happyeduhub.backend.core.dtos.in.RegisterInDto;
@@ -17,6 +20,13 @@ import com.happyeduhub.backend.repositories.UserRepository;
 public class UserService implements UserDetailsService {
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  @Lazy
+  private PasswordEncoder passwordEncoder;
+
+  @Autowired
+  private EntityDtoMapper entityDtoMapper;
 
   @Override
   public UserEntity loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -32,16 +42,9 @@ public class UserService implements UserDetailsService {
     }
     user = userRepository.save(UserEntity.builder()
         .username(registerInDto.getUsername())
-        .password(registerInDto.getPassword())
+        .password(passwordEncoder.encode(registerInDto.getPassword()))
         .role(UserRole.STUDENT)
         .build());
-    return new SingleOutDto<UserDto>(UserDto.builder()
-        .id(user.getId())
-        .username(user.getUsername())
-        .role(user.getRole())
-        .createdAt(user.getCreatedAt())
-        .updatedAt(user.getUpdatedAt())
-        .version(user.getVersion())
-        .build());
+    return new SingleOutDto<UserDto>(entityDtoMapper.user(user));
   }
 }
