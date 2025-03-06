@@ -24,4 +24,12 @@ public class ExceptionDto extends Exception {
         .type("BAD_REQUEST_EXCEPTION")
         .build();
   }
+
+  public static ExceptionDto unauthorized(String message) {
+    return ExceptionDto.builder()
+        .message(message)
+        .status(HttpStatus.UNAUTHORIZED.value())
+        .type("UNAUTHORIZED_EXCEPTION")
+        .build();
+  }
 }
