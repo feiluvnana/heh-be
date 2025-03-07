@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.happyeduhub.backend.core.dtos.common.UserDto;
-import com.happyeduhub.backend.core.dtos.exception.ExceptionDto;
-import com.happyeduhub.backend.core.dtos.in.RegisterInDto;
-import com.happyeduhub.backend.core.dtos.out.SingleOutDto;
+import com.happyeduhub.backend.dtos.entities.UserDto;
+import com.happyeduhub.backend.dtos.exceptions.ExceptionDto;
+import com.happyeduhub.backend.dtos.ins.LoginInDto;
+import com.happyeduhub.backend.dtos.ins.RegisterInDto;
+import com.happyeduhub.backend.dtos.outs.LoginOutDto;
+import com.happyeduhub.backend.dtos.outs.SingleItemOutDto;
 import com.happyeduhub.backend.services.UserService;
 
 import jakarta.validation.Valid;
@@ -22,8 +24,13 @@ public class AuthController {
   private UserService userService;
 
   @PostMapping("/register")
-  public ResponseEntity<SingleOutDto<UserDto>> register(@RequestBody @Valid RegisterInDto dto)
+  public ResponseEntity<SingleItemOutDto<UserDto>> register(@RequestBody @Valid RegisterInDto dto)
       throws ExceptionDto {
     return ResponseEntity.ok(userService.create(dto));
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<LoginOutDto> login(@RequestBody @Valid LoginInDto dto) throws ExceptionDto {
+    return ResponseEntity.ok(userService.login(dto));
   }
 }

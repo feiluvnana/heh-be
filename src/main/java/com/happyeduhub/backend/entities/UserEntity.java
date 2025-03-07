@@ -1,5 +1,6 @@
 package com.happyeduhub.backend.entities;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.happyeduhub.backend.core.enums.UserGender;
 import com.happyeduhub.backend.core.enums.UserRole;
 
 import jakarta.persistence.Column;
@@ -35,6 +37,28 @@ public class UserEntity extends BaseEntity implements UserDetails {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private UserRole role;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private UserGender gender;
+
+	@Column(nullable = false)
+	private boolean isThaiphien;
+
+	@Column(nullable = true)
+	private String tel;
+
+	@Column(nullable = true)
+	private String avatar;
+
+	@Column(nullable = true)
+	private Instant dob;
+
+	@Column(nullable = true)
+	private String code;
+
+	@Column(nullable = true)
+	private String address;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

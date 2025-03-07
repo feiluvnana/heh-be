@@ -1,4 +1,4 @@
-package com.happyeduhub.backend.core.dtos.common;
+package com.happyeduhub.backend.dtos.entities;
 
 import java.time.Instant;
 import java.util.UUID;

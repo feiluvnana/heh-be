@@ -1,4 +1,4 @@
-package com.happyeduhub.backend.core.dtos.out;
+package com.happyeduhub.backend.dtos.outs;
 
 import java.util.List;
 
@@ -7,6 +7,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class MultipleOutDto<T> {
+public class MultipleItemsOutDto<T> {
   private List<T> data;
 }

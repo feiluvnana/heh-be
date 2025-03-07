@@ -1,6 +1,7 @@
 package com.happyeduhub.backend.configurations;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,16 +16,20 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.happyeduhub.backend.core.dtos.exception.ExceptionDto;
+import com.happyeduhub.backend.core.enums.UserRole;
 import com.happyeduhub.backend.core.utils.JwtUtility;
+import com.happyeduhub.backend.dtos.exceptions.ExceptionDto;
 import com.happyeduhub.backend.services.UserService;
 
 import jakarta.servlet.FilterChain;
@@ -45,8 +50,13 @@ public class SecurityConfiguration {
 		http
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(AbstractHttpConfigurer::disable)
-				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+				.authorizeHttpRequests(auth -> {
+					auth.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll();
+					auth.anyRequest().authenticated();
+				})
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(
+						exception -> exception.authenticationEntryPoint(new JWTAuthenticationEntryPoint(objectMapper)));
 		http.addFilterBefore(new JwtAuthenticationFilter(jwtUtility, objectMapper),
 				UsernamePasswordAuthenticationFilter.class);
 		return http.build();
@@ -76,21 +86,37 @@ class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain)
 			throws ServletException, IOException {
-		try {
-			String authorizationHeader = request.getHeader("Authorization");
-			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-				String token = authorizationHeader.substring(7);
-				String username = jwtUtility.getUsernameFromToken(token);
-				SecurityContextHolder.getContext()
-						.setAuthentication(new UsernamePasswordAuthenticationToken(username, null,
-								null));
-			}
+		String authorizationHeader = request.getHeader("Authorization");
+		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
-			SecurityContextHolder.clearContext();
+			return;
+		}
+
+		try {
+			String token = authorizationHeader.substring(7);
+			String username = jwtUtility.getUsernameFromToken(token);
+			UserRole role = jwtUtility.getRoleFromToken(token);
+			SecurityContextHolder.getContext()
+					.setAuthentication(new UsernamePasswordAuthenticationToken(username, null,
+							Collections.singleton(new SimpleGrantedAuthority(role.name()))));
+			filterChain.doFilter(request, response);
 		} catch (ExceptionDto ex) {
 			response.setStatus(ex.getStatus());
 			response.setContentType("application/json");
 			response.getWriter().write(objectMapper.writeValueAsString(ex));
 		}
+	}
+}
+
+@AllArgsConstructor
+class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
+	final ObjectMapper objectMapper;
+
+	@Override
+	public void commence(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException authException) throws IOException, ServletException {
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		response.setContentType("application/json");
+		response.getWriter().write(objectMapper.writeValueAsString(ExceptionDto.unauthorized("Không có token.")));
 	}
 }
